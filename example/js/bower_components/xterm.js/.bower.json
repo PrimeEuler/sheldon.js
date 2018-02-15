@@ -1,0 +1,20 @@
+{
+  "name": "xterm.js",
+  "version": "2.0.1",
+  "ignore": [
+    "demo",
+    "test",
+    ".gitignore"
+  ],
+  "homepage": "https://github.com/sourcelair/xterm.js",
+  "_release": "2.0.1",
+  "_resolution": {
+    "type": "version",
+    "tag": "2.0.1",
+    "commit": "76a890aa741c8eaa6a21ee9a2a036d7a00168412"
+  },
+  "_source": "https://github.com/sourcelair/xterm.js.git",
+  "_target": "^2.0.1",
+  "_originalSource": "xterm.js",
+  "_direct": true
+}

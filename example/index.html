@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+    <title>pipe</title>
+    
+    <!--custom jquery-->
+    <link rel="stylesheet"  type="text/css" media="screen" href="css/flat-8139-theme/jquery-ui-1.10.4.custom.min.css"/>
+    <script type='text/javascript' src="js/jquery-1.10.2.min.js"></script>
+    <script type='text/javascript' src="js/jquery-ui-1.10.4.custom.min.js"></script>
+    
+    <!--touch, dialogextend and jquery mouswheel plugin -->
+    <script type='text/javascript' src="js/jquery.mousewheel.js"></script>
+    <script type="text/javascript" src="js/jquery.dialogextend.min.js"></script>
+    <script type="text/javascript" src="js/jquery.ui.touch-punch.min.js"></script>
+    
+    <link rel="stylesheet" href="css/client.css"/>
+    <link rel="stylesheet" href="js/bower_components/xterm.js/dist/xterm.css" />
+    
+    <script type="text/javascript" src="js/bower_components/xterm.js/dist/xterm.js"></script>
+	<script type="text/javascript" src="js/bower_components/xterm.js/addons/fit/fit.js"></script>
+	<script type="text/javascript" src="js/pubsub.min.js"></script>
+	<script type="text/javascript" src="js/bundle.js"></script>
+	<script type="text/javascript" src="js/schema.js"></script>
+	<script type="text/javascript" src="js/mediaStream.js"></script>
+	
+	<script type="text/javascript" src="js/ace.js"></script>
+	
+</head>
+<body >
+    <script type="text/javascript">
+    var sheldon     = require('sheldon');
+    var SHELL       = new sheldon.shell();
+    var termOptions = { cols: 100, rows: 35, screenKeys: true, convertEol:true, cursorBlink:true }
+    var TERMINAL    = new Terminal(termOptions);
+        TERMINAL.open(document.body);
+        TERMINAL.on('data',function(data,e,f){
+            SHELL.write(data)
+        })
+        SHELL.on('data',function(data){
+            TERMINAL.write(data.toString())
+        })
+        SHELL.on('end',function(){
+            $( "#" + SHELL.id ).dialog( "destroy" )
+            TERMINAL.destroy();
+        })
+        SHELL.context.window = window
+        SHELL.context.REPL.LOOP.ansi();
+        SHELL.context.pubMedia = function(options){
+            var stream = new sheldon.stream.Transform({
+                writableObjectMode: true,
+                transform:function(chunk, encoding, callback) {
+                    callback(null, chunk);
+                }
+            });
+                stream.id = 'publish_' + options.id
+                stream.width = 666;
+                stream.height = 533;
+                streamUI(stream)
+                
+            var config = {
+                constraints:{ video: true, audio:true },
+                mimeType:'video/webm; codecs="vp8, opus"',
+                interval:100,
+                log:SHELL.context.REPL.PRINT.ansi
+            }
+            var encoder = mediaStream.createMediaEncoder(config);
+                encoder.on_data = function(data){
+                    //stream.write( new sheldon.Buffer(data) )
+                    stream.write( data )
+                }
+                
+                $(encoder.canvas)
+                    .width(640)
+                    .height(480)
+                    .appendTo( $("#" + stream.id) )
+                
+                stream.on('end',function(){
+                    console.log(encoder)
+                    encoder.end()
+        	    })
+        	    encoder.start();
+
+
+        }
+        SHELL.context.subMedia = function(){
+            
+        }
+    var streamIndex = -1;
+    function streamUI(stream){
+                streamIndex+=5;
+                var div     = { 
+                        id: stream.id, 
+                        style: 'background-image: url("unit1.png"); background-repeat:no-repeat; background-size: contain;background-position: center;'
+                    };
+                var dialog  = {
+                        "width": stream.width,
+                        "height": stream.height,
+                        "minHeight":stream.height,
+                        "minWidth": stream.width,
+                        "position": [50 + streamIndex   ,50 + streamIndex],
+                        "title": stream.id,
+                        "style":'font-size: 20pt; background-image: url("unit1.png"); background-repeat:no-repeat; background-size: contain;background-position: center;',
+                        "close" : function(event, ui){ stream.end(); $("#" + stream.id).remove()  }
+                    };
+                var extend = {
+                        "closable": true,
+                        "minimizable": true,
+                        "maximizable": true,
+                        "collapsable": true,
+                        "dblclick": "collapse",
+                        "titlebar": "transparent",
+                        "minimizeLocation": "left"
+                    }
+                    
+                var ui = $('<div/>', div )
+                    .appendTo( "body" )
+                    .dialog( dialog )
+                    .dialogExtend( extend )
+                    .data("uiDialog")._title = function (title) { title.html(this.options.title); };
+                    //document.getElementById( stream.id).style.textShadow = "5px 5px 1px #000000";
+                    $("#" + stream.id).bind("dialogdragstop", stream.ioCTL);
+                    $("#" + stream.id).bind("dialogresizestop", stream.ioCTL);
+                    $("#" + stream.id).bind("dialogextendminimize", stream.ioCTL);
+                    $("#" + stream.id).bind("dialogextendmaximize", stream.ioCTL);
+                    $("#" + stream.id).bind("dialogextendcollapse", stream.ioCTL);
+                    $("#" + stream.id).bind("dialogextendrestore", stream.ioCTL);
+               
+                    
+
+    }
+        
+        
+        
+    </script>
+</body>
+    
+    
+    
